@@ -19,4 +19,4 @@ Script PowerShell que automatiza a instalação completa de um cluster Docker Sw
 2. Execute **apenas este comando**:
 
 ```powershell
-irm https://raw.githubusercontent.com/SEU_USUARIO/auto-docker-vagrant-windows/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/rivonildo/auto-docker-vagrant-windows/main/install.ps1 | iex
