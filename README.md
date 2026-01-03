@@ -24,7 +24,11 @@ Script PowerShell que **automatiza completamente** a instalação de um cluster 
 2.  Execute **apenas este comando**:
 
 ```powershell
-irm https://raw.githubusercontent.com/rivonildo/auto-docker-vagrant-windows/main/install.ps1 | iex
+
+Set-ExecutionPolicy Bypass -Scope Process -Force
+irm https://raw.githubusercontent.com/rivonildo/auto-docker-vagrant-windows/main/install.ps1 -OutFile test.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\test.ps1 -Verbose
+
 
 Método 2: Instalador em Lote (Para qualquer pessoa)
 Baixe o arquivo Instalar-Cluster-Docker.bat deste repositório.
@@ -84,19 +88,3 @@ Criado por Rivonildo - GitHub
 ⭐ Se este projeto foi útil para você, considere dar uma estrela no repositório!
 
 
-
----
-
-### 🚀 Passos para Atualizar Localmente e no GitHub
-
-Vamos fazer isso **um passo por vez**. Siga exatamente:
-
-**PASSO 1 — Salve o novo README localmente**
-1.  Abra o arquivo `README.md` no Bloco de Notas (ou VS Code).
-2.  **Apague TODO** o conteúdo atual.
-3.  **Cole TODO** o conteúdo do README atualizado (acima).
-4.  **Salve** o arquivo.
-
-**✅ Confirmação:**
-Após salvar, responda:
-**ok**
