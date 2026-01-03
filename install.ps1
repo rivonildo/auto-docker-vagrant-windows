@@ -34,17 +34,24 @@ $psMajor = $PSVersionTable.PSVersion.Major
 
 if ($psMajor -lt 7) {
     Log "PowerShell antigo detectado (v$psMajor)" "Yellow"
-    Log "Atualizando para PowerShell 7..." "Yellow"
-
-    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-        Log "Winget não encontrado. Atualize o Windows antes de continuar." "Red"
-        exit 1
+    
+    # Verificar se PowerShell 7 já está instalado
+    if (-not (Get-Command pwsh -ErrorAction SilentlyContinue)) {
+        Log "PowerShell 7 nao encontrado. Instalando..." "Yellow"
+        
+        if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+            Log "Winget nao encontrado. Atualize o Windows antes de continuar." "Red"
+            exit 1
+        }
+        
+        winget install --id Microsoft.PowerShell -e --source winget
     }
-
-    winget install --id Microsoft.PowerShell -e --source winget
-
+    
     Log "Reabrindo o script no PowerShell 7..." "Cyan"
-    Start-Process pwsh "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+    
+    # Usar -NoExit para manter a janela aberta e -Command para execução direta
+    $fullPath = (Resolve-Path $PSCommandPath).Path
+    Start-Process pwsh "-NoExit -NoProfile -ExecutionPolicy Bypass -Command `"& '$fullPath'`""
     exit
 }
 
@@ -90,7 +97,7 @@ if (Command-Exists "vagrant") {
     winget install --id Hashicorp.Vagrant -e --source winget
 }
 
-Log "Preparação do ambiente concluída com sucesso!" "Cyan"
+Log "Preparacao do ambiente concluida com sucesso!" "Cyan"
 
 # --------------------------
 # CLONE DO PROJETO
@@ -101,7 +108,7 @@ $projectRoot = "C:\docker-projeto2-cluster"
 if (Test-Path $projectRoot) {
     Log "Projeto já existe em $projectRoot. Pulando clone..." "Green"
 } else {
-    Log "Clonando repositório do cluster Docker..." "Yellow"
+    Log "Clonando repositorio do cluster Docker..." "Yellow"
     git clone https://github.com/rivonildo/docker-projeto2-cluster.git $projectRoot
 }
 
@@ -110,7 +117,7 @@ if (Test-Path $projectRoot) {
 # --------------------------
 
 Set-Location $projectRoot
-Log "Diretório do projeto pronto para execução." "Cyan"
+Log "Diretorio do projeto pronto para execucao." "Cyan"
 
 # --------------------------
 # INICIAR CLUSTER COM VAGRANT
@@ -155,11 +162,9 @@ Log "==========================================" "Cyan"
 Log " INSTALAÇÃO E CONFIGURAÇÃO CONCLUÍDAS! " "Green"
 Log "==========================================" "Cyan"
 Log ""
-Log "Próximos passos:" "Yellow"
+Log "Proximos passos:" "Yellow"
 Log "1. Acesse o master: vagrant ssh master" "White"
 Log "2. Liste os nodes do Swarm: docker node ls" "White"
-Log "3. Teste um serviço: docker service create --name web -p 8080:80 nginx" "White"
+Log "3. Teste um servico: docker service create --name web -p 8080:80 nginx" "White"
 Log ""
 Log "O cluster está pronto para uso." "Green"
-
-
