@@ -1,107 +1,38 @@
-.gitignore para Projeto PowerShell/Vagrant
-Arquivos do sistema operacional
+# ===========================================
+# .gitignore para Auto Docker Cluster (Windows)
+# ===========================================
+
+# --- ARQUIVOS DO SISTEMA ---
 .DS_Store
 Thumbs.db
 desktop.ini
 
-Arquivos do PowerShell
-*.ps1xml
-*.psm1
-*.psd1
-*.pssc
-*.cdxml
-
-Arquivos temporários
+# --- ARQUIVOS TEMPORÁRIOS/LOG ---
 *.tmp
 *.temp
 *.log
-.log.
 *.bak
-.old
-~$
+*.old
+~$*
 
-Arquivos de IDE/Editor
+# --- AMBIENTE VAGRANT ---
+.vagrant/               # Estado completo das VMs (NUNCA versionar!)
+Vagrantfile~           # Backup do Vagrantfile
+.vagrantuser           # Configurações locais do usuário
+
+# --- ARQUIVOS DE IDE/EDITOR ---
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
-Arquivos do Vagrant
-.vagrant/
-Vagrantfile~
-.vagrantuser
+# --- ARQUIVOS GERADOS POR SCRIPTS ---
+test.ps1               # Arquivo temporário de teste
+install_local.ps1      # Cópia local do script principal
 
-Arquivos do VirtualBox
-*.vbox
-*.vbox-prev
-VirtualBox VMs/
-
-Arquivos de projeto
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
-Arquivos de backup/restauração
-*.backup
-.backup.
-
-Arquivos de cache
-.cache/
-
-Arquivos de lock
-*.lock
-package-lock.json
-yarn.lock
-
-Arquivos de ambiente
+# --- CONFIGURAÇÕES LOCAIS/SENSÍVEIS ---
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-Arquivos de credenciais
-*.pem
+*.local.*
+config.local.*
 *.key
-*.crt
-*.cert
-
-Arquivos gerados pelo script
-test.ps1
-install_local.ps1
-C:\docker-projeto2-cluster/ # Cuidado: Isso ignora a pasta inteira, pode não ser o que você quer
-
-Arquivos de log específicos
-vagrant-.log
-VBox-.log
-
-Arquivos de configuração local
-config.local.ps1
-settings.local.json
-
-Arquivos de teste
-TestResults/
-*.trx
-*.coverage
-.coverage
-
-Arquivos de pacote
-*.nupkg
-*.snupkg
-
-Arquivos de publicação
-publish/
-dist/
-
-Arquivos de documentação gerados
-docs/_site/
-_site/
-site/
-
-
-Para um controle mais fino sobre a pasta docker-projeto2-cluster, você pode especificar:
-C:\docker-projeto2-cluster/.vagrant/
-C:\docker-projeto2-cluster/*.log
-C:\docker-projeto2-cluster/Vagrantfile~
+*.pem
