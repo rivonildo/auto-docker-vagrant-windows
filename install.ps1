@@ -1,189 +1,55 @@
-# ==========================================
-# AUTO INSTALL - DOCKER CLUSTER COM VAGRANT
-# Windows (VirtualBox + Vagrant)
-# ==========================================
+Write-Host "==============================="
+Write-Host " AUTO SETUP DOCKER + VAGRANT "
+Write-Host "==============================="
 
-# --------------------------
-# UTF-8 DEFINITIVO
-# --------------------------
-[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new()
-$OutputEncoding = [System.Text.UTF8Encoding]::new()
+# -------- CONFIGURAÇÕES --------
+$BasePath = "C:\Projetos"
+$ProjectName = "auto-docker-vagrant-windows"
+$ProjectPath = Join-Path $BasePath $ProjectName
+$RepoURL = "https://github.com/rivonildo/auto-docker-vagrant-windows.git"
 
-# --------------------------
-# FUNÇÃO DE LOG
-# --------------------------
-function Log {
-    param (
-        [string]$Message,
-        [string]$Color = "White"
-    )
-    Write-Host "[AUTO-DOCKER] $Message" -ForegroundColor $Color
+# -------- CRIAR PASTA BASE --------
+if (!(Test-Path $BasePath)) {
+    Write-Host "Criando pasta base em $BasePath..."
+    New-Item -ItemType Directory -Path $BasePath | Out-Null
 }
 
-# --------------------------
-# FUNÇÃO: ATUALIZAR PATH DA SESSÃO
-# --------------------------
-function Update-SessionPath {
-    # Combina o PATH da Máquina e do Usuário na sessão atual do PowerShell
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-    Log "PATH da sessao atualizado." "Cyan"
-}
-
-Clear-Host
-Log "==========================================" "Cyan"
-Log " AUTO INSTALL - DOCKER CLUSTER COM VAGRANT " "Green"
-Log "==========================================" "Cyan"
-Log ""
-Log "Iniciando preparacao do ambiente..." "Yellow"
-
-# --------------------------
-# CHECK POWERSHELL VERSION
-# --------------------------
-$psMajor = $PSVersionTable.PSVersion.Major
-
-if ($psMajor -lt 7) {
-    Log "PowerShell antigo detectado (v$psMajor)" "Yellow"
-    Log "Atualizando para PowerShell 7..." "Yellow"
-
-    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-        Log "Winget não encontrado. Atualize o Windows antes de continuar." "Red"
-        exit 1
-    }
-
-    winget install --id Microsoft.PowerShell -e --source winget
-
-    Log "Reabrindo o script no PowerShell 7..." "Cyan"
-    Start-Process pwsh "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
-    exit
-}
-
-Log "PowerShell $($PSVersionTable.PSVersion) OK" "Green"
-
-# --------------------------
-# FUNÇÃO: VERIFICAR COMANDO
-# --------------------------
-function Command-Exists {
-    param ([string]$Command)
-    return (Get-Command $Command -ErrorAction SilentlyContinue) -ne $null
-}
-
-# --------------------------
-# CHECK GIT (COM ATUALIZAÇÃO DE PATH)
-# --------------------------
-if (Command-Exists "git") {
-    Log "Git já instalado. Pulando..." "Green"
+# -------- CLONAR PROJETO --------
+if (!(Test-Path $ProjectPath)) {
+    Write-Host "Clonando repositório em $ProjectPath..."
+    Set-Location $BasePath
+    git clone $RepoURL
 } else {
-    Log "Git não encontrado. Instalando..." "Yellow"
-    winget install --id Git.Git -e --source winget
-    Update-SessionPath
-    # Verificação pós-instalação
-    if (Command-Exists "git") {
-        Log "Git instalado e disponível no PATH." "Green"
-    } else {
-        Log "ATENÇÃO: Git instalado, mas não foi encontrado no PATH. Reinicie o PowerShell." "Yellow"
-    }
+    Write-Host "Projeto já existe. Pulando clone."
 }
 
-# --------------------------
-# CHECK VIRTUALBOX (COM ATUALIZAÇÃO DE PATH)
-# --------------------------
-$virtualBoxPath = "C:\Program Files\Oracle\VirtualBox\VBoxManage.exe"
+Set-Location $ProjectPath
 
-if (Test-Path $virtualBoxPath) {
-    Log "VirtualBox já instalado. Pulando..." "Green"
-} else {
-    Log "VirtualBox não encontrado. Instalando..." "Yellow"
-    winget install --id Oracle.VirtualBox -e --source winget
-    # Adiciona o caminho específico do VirtualBox ao PATH da sessão
-    $env:Path += ";C:\Program Files\Oracle\VirtualBox"
-    Log "Caminho do VirtualBox adicionado ao PATH da sessao." "Cyan"
+# -------- INSTALAR CHOCOLATEY --------
+if (!(Get-Command choco -ErrorAction SilentlyContinue)) {
+    Write-Host "Instalando Chocolatey..."
+    Set-ExecutionPolicy Bypass -Scope Process -Force
+    [System.Net.ServicePointManager]::SecurityProtocol = 3072
+    Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 }
 
-# --------------------------
-# CHECK VAGRANT (COM ATUALIZAÇÃO DE PATH)
-# --------------------------
-if (Command-Exists "vagrant") {
-    Log "Vagrant já instalado. Pulando..." "Green"
-} else {
-    Log "Vagrant não encontrado. Instalando..." "Yellow"
-    winget install --id Hashicorp.Vagrant -e --source winget
-    Update-SessionPath
-    # Verificação pós-instalação
-    if (Command-Exists "vagrant") {
-        Log "Vagrant instalado e disponível no PATH." "Green"
-    } else {
-        Log "ATENÇÃO: Vagrant instalado, mas não foi encontrado no PATH. Reinicie o PowerShell." "Yellow"
-    }
+# -------- INSTALAR GIT --------
+if (!(Get-Command git -ErrorAction SilentlyContinue)) {
+    Write-Host "Instalando Git..."
+    choco install git -y
 }
 
-Log "Preparação do ambiente concluída com sucesso!" "Cyan"
+# -------- INSTALAR DOCKER --------
+Write-Host "Instalando Docker Desktop..."
+choco install docker-desktop -y
 
-# --------------------------
-# CLONE DO PROJETO
-# --------------------------
+# -------- INSTALAR VAGRANT --------
+Write-Host "Instalando Vagrant..."
+choco install vagrant -y
 
-$projectRoot = "C:\docker-projeto2-cluster"
-
-if (Test-Path $projectRoot) {
-    Log "Projeto já existe em $projectRoot. Pulando clone..." "Green"
-} else {
-    Log "Clonando repositório do cluster Docker..." "Yellow"
-    git clone https://github.com/rivonildo/docker-projeto2-cluster.git $projectRoot
-}
-
-# --------------------------
-# ACESSAR DIRETÓRIO
-# --------------------------
-
-Set-Location $projectRoot
-Log "Diretório do projeto pronto para execução." "Cyan"
-
-# --------------------------
-# INICIAR CLUSTER COM VAGRANT
-# --------------------------
-
-Log "Verificando status do Vagrant..." "Cyan"
-
-$vagrantStatus = vagrant status --machine-readable 2>$null | Select-String -Pattern "state," | ForEach-Object {
-    ($_ -split ",")[3]
-}
-
-if ($vagrantStatus -contains "running") {
-    Log "Cluster já está rodando. Pulando..." "Green"
-} else {
-    Log "Subindo máquinas do cluster (pode levar alguns minutos)..." "Yellow"
-    vagrant up
-
-    if ($LASTEXITCODE -eq 0) {
-        Log "Cluster iniciado com sucesso!" "Green"
-    } else {
-        Log "Erro ao iniciar o cluster. Verifique os logs do Vagrant." "Red"
-        exit 1
-    }
-}
-
-# --------------------------
-# STATUS FINAL
-# --------------------------
-
-Log "Exibindo status final do cluster..." "Cyan"
-vagrant status
-
-Log "Para acessar as máquinas, use: vagrant ssh master" "Yellow"
-Log "Ou use: vagrant ssh node1" "Yellow"
-Log "Para ver os nodes do Docker Swarm: vagrant ssh master -c 'docker node ls'" "Cyan"
-
-# --------------------------
-# FINALIZAÇÃO
-# --------------------------
-
-Log "==========================================" "Cyan"
-Log " INSTALAÇÃO E CONFIGURAÇÃO CONCLUÍDAS! " "Green"
-Log "==========================================" "Cyan"
-Log ""
-Log "Próximos passos:" "Yellow"
-Log "1. Acesse o master: vagrant ssh master" "White"
-Log "2. Liste os nodes do Swarm: docker node ls" "White"
-Log "3. Teste um serviço: docker service create --name web -p 8080:80 nginx" "White"
-Log ""
-Log "O cluster está pronto para uso." "Green"
+# -------- FINAL --------
+Write-Host ""
+Write-Host "==============================="
+Write-Host " INSTALAÇÃO FINALIZADA COM SUCESSO "
+Write-Host "==============================="
+Write-Host "Reinicie o computador antes de usar Docker ou Vagrant."
